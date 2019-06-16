@@ -1,11 +1,12 @@
 const buildMessage = require("./createMessage.js")
 module.exports = class Command{
-   constructor(options){
-       this.name = options.aliases ? options.aliases.concat(options.name).map(a => a.toLowerCase()) : [options.name.toLowerCase()]
+   constructor(options = {}) {
+       this.name = options.name || "invalid"
        this.cd = options.cooldown || 0
-       this.help = options.help || options.name;
+       this.description = options.description || "Comando sem Descrição"
        this.cdMessage = options.cdMessage 
-       this.category = options.category || "noCategory"
+       this.category = options.category || "Sem categoria"
+       this.guildOnly = options.guildOnly || false
        this.ob = []
        this.run = options.run || function(params){
           params.message.reply({
@@ -17,7 +18,7 @@ module.exports = class Command{
           })
        };
    }
-   runCommand(message,prefix,args){
+   runCommand(message, prefix, args){
        let _this = this
        try{
        this.run({
