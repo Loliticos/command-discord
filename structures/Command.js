@@ -1,6 +1,6 @@
 const buildMessage = require("./createMessage.js")
-module.exports = class Command{
-   constructor(options = {}) {
+module.exports = class Command {
+   constructor(client, options = {}) {
        this.name = options.name || "invalid"
        this.cd = options.cooldown || 0
        this.description = options.description || "Comando sem Descrição"
@@ -10,6 +10,7 @@ module.exports = class Command{
        this.clientPermissions = options.clientPermissions || null
        this.permissions = options.permissions || null
        this.ob = []
+       this.client = client
        this.run = options.run || function(params){
           params.message.reply({
              embed:{
@@ -37,8 +38,8 @@ module.exports = class Command{
 	
        this.run({
            message:message,
-           args:args.map(a=> isNaN(a) ? a : parseInt(a)),
-           client:message.client,
+           args: args,
+           client: message.client,
            prefix:prefix,
 		   buildMessage(params={}){
             params.title  = params.title ? params.title : _this.name.pop();
