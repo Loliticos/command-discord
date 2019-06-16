@@ -7,6 +7,8 @@ module.exports = class Command{
        this.cdMessage = options.cdMessage 
        this.category = options.category || "Sem categoria"
        this.guildOnly = options.guildOnly || false
+       this.clientPermissions = options.clientPermissions || null
+       this.permissions = options.permissions || null
        this.ob = []
        this.run = options.run || function(params){
           params.message.reply({
@@ -20,7 +22,19 @@ module.exports = class Command{
    }
    runCommand(message, prefix, args){
        let _this = this
-       try{
+       try {
+       const client = message.guild.me
+       if(options.permissions) {
+	  const missing = message.channel.permissionsFor(message.author).missing(this.userPermissions)
+	  if(missing.length > 0) {
+	    if(missing.length === 1) {
+		return message.channel.send(`Você precisa da permissão \`${this.userPermissions.join(", ")}\` para executar esse comando.`)
+	    }
+	  }
+	       
+       }
+       if(!client.hasPermissions(options.permissions))
+	
        this.run({
            message:message,
            args:args.map(a=> isNaN(a) ? a : parseInt(a)),
