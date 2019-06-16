@@ -1,20 +1,29 @@
 module.exports = function (client) {
-    client.on("message", function (message){
-       if (message.author.bot || !message.guild) return;
-       if (client.prefix.find(a => message.content.startsWith(a)) || message.content.toLowerCase().startsWith(client.user.username.toLowerCase()) || message.content.startsWith(message.guild.me.toString())){
-        const prefix = client.prefix.find(a => message.content.startsWith(a)) ? client.prefix.find(a => message.content.startsWith(a)) : message.content.startsWith(client.user.username) ? client.user.username.toLowerCase() : message.guild.me.toString();
-        const clientCommand = client.prefix.includes(prefix) ? message.content.split(" ")[0].slice(prefix.length) : message.content.split(" ")[1]
-        if (!clientCommand) return;   
-        const args = client.prefix.includes(prefix) ? message.content.split(" ").slice(1) :message.content.split(" ").slice(2)
-           const command = client.commands.find(a => a.name.includes(clientCommand.toLowerCase()));   
-           if (!command) return
-           if (command.ob.includes(message.author.id)) return message.reply(command.cdMessage || "Wait for use this command again")
-           if ((!client.prefixConfig.useUsername  && prefix == client.user.username) || (!client.prefixConfig.useMention  && prefix == message.guild.me.toString())) return;
-           const oldmention = message.mentions.users
-           if (message.content.startsWith(message.guild.me.toString())) message.mentions.users = message.mentions.users.filter((a) => a.id != client.user.id)
-           if (args.includes(message.guild.me.toString()) && message.content.startsWith(message.guild.me.toString()) ) message.mentions.users = oldmention;
-           command.runCommand(message,prefix,args)
-       }
+    client.on("message", (async message) => {
+        if (message.author.bot) return;
+        const { language, prefix } = message.guild ? await database.Guilds.findOne({_id: message.guild.id}) : null
+        const guildId = message.guild && message.guild.id
+
+        const botMention = client.user.toString()
+
+        const sw = (...s) => s.some(st => message.content.startsWith(st))
+        const usedPrefix = sw(botMention, `<@!${client.user.id}>`) ? `${botMention} ` : sw(prefix) ? prefix : null
+        
+        if (usedPrefix) {
+            const fullCmd = message.content.substring(usedPrefix.length).split(/[ \t]+/).filter(a => a)
+            const args = fullCmd.slice(1)
+            if (!fullCmd.length) return
+            
+            const cmd = fullCmd[0].toLowerCase().trim()
+            const command = client.commands.find(c => c.name.includes(cmd))
+      
+            if(command) {
+                if(message.content.startsWith(message.guild.me.toString())) message.mentions.users = message.mentions.users.filter(a => a.id != client.user.id)
+
+                const t = client.i18next.getFixedT(language)
+      
+                command.runCommand(message, args, t)
+      }
+    }
     })
-    if (client.prefixConfig.editMessage) client.on("messageUpdate",(_,newmsg) => client.emit("message",newmsg));
 }
