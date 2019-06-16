@@ -2,10 +2,9 @@ const Discord = require("discord.js")
 const Command = require("../structures/Command.js")
 const fs = require("fs")
 module.exports = class Client extends Discord.Client{
-   constructor(options={},clientOptions={}){
+   constructor(options ={}, clientOptions ={}){
       super(clientOptions);
       this.optins = options;
-      this.logErrors = options.logErrors || true;
       this.clientOptions = clientOptions;
       this.token = options.token || clientOptions.token;
       this.color = options.color || "65535";
@@ -15,7 +14,7 @@ module.exports = class Client extends Discord.Client{
       this.commands.get = function(command){
         return this.find(a => a.name.toLowerCase() == command.toLowerCase() || a.aliases.includes(command.toLowerCase()))
     }
-      this.prefix = Array.isArray(options.prefix) ? options.prefix : [options.prefix || "!"];
+      this.prefix = "y!";
       this.prefixConfig = {
           useUsername: options.prefixConfig ? options.prefixConfig.useUsername : true,
           useMention: options.prefixConfig ? options.prefixConfig.useMention : true,
@@ -25,6 +24,7 @@ module.exports = class Client extends Discord.Client{
       this.external = {}
       if (options.external) options.external.forEach(val => this.external[val.key] = val.value ); 
    }
+   
    initCommands(path){
     const cmds =  fs.readdirSync(path || this.commandPath);
     cmds.forEach((a) =>{
